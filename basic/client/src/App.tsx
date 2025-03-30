@@ -1,8 +1,39 @@
+import { useState } from 'react';
+
 const App = () => {
+  const [uploaded, setUploaded] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    const fileInput = document.getElementById('file') as HTMLInputElement;
+    
+    if (fileInput && fileInput.files) {
+      formData.append('file', fileInput.files[0]);
+    }
+
+    try {
+      const response = await fetch('http://localhost:3000/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        setUploaded(true);
+        console.log('File uploaded successfully');
+      } else {
+        console.log('Upload failed');
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
+  };
+
   return (
     <div className="w-full h-[100vh] bg-neutral-100 dark:bg-neutral-950 text-neutral-950 dark:text-neutral-100 flex flex-col items-center justify-center gap-6">
       <h1 className="text-5xl font-bold underline underline-offset-4 decoration-yellow-500">File Uploads</h1>
-      <form action="http://localhost:3000/upload" method="POST" encType="multipart/form-data" className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white" htmlFor="file">Upload file</label>
           <input 
@@ -19,6 +50,7 @@ const App = () => {
           Upload
         </button>
       </form>
+      {uploaded && <p>File uploaded successfully!</p>}
     </div>
   );
 };
